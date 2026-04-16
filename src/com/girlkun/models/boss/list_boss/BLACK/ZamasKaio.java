@@ -1,0 +1,106 @@
+package com.girlkun.models.boss.list_boss.BLACK;
+
+import com.girlkun.models.boss.*;
+import com.girlkun.models.item.Item;
+import com.girlkun.models.map.ItemMap;
+import com.girlkun.models.player.Player;
+import com.girlkun.server.Manager;
+import com.girlkun.services.EffectSkillService;
+import com.girlkun.services.Service;
+import com.girlkun.utils.Util;
+import java.util.Arrays;
+import java.util.List;
+
+import java.util.Random;
+
+public class ZamasKaio extends Boss {
+
+    public ZamasKaio() throws Exception {
+        super(BossID.ZAMASZIN, BossesData.ZAMAS);
+    }
+
+    @Override
+    public void reward(Player plKill) {
+        byte randomDo = (byte) new Random().nextInt(Manager.itemDC14.length);
+        byte randomNR = (byte) new Random().nextInt(Manager.itemIds_NR_SB.length);
+        int[] itemDos = new int[]{650, 651, 652, 653, 654, 655, 656, 657, 658, 659, 660, 661, 662}; // đồ hủy diệt
+        int randomc14 = new Random().nextInt(itemDos.length);
+        if (Util.isTrue(BossManager.ratioReward, 100)) {
+            if (Util.isTrue(95, 100)) {
+                Service.gI().dropItemMap(this.zone, new ItemMap(zone, 1861, 5, this.location.x, this.location.y, plKill.id));//tiền
+                Service.gI().dropItemMap(this.zone, new ItemMap(zone, 874, 1, this.location.x, this.location.y, plKill.id));//tiền
+                return;
+            }
+            Service.gI().dropItemMap(this.zone, Util.ratioDHD(zone, Manager.itemDC14[randomDo], 1, this.location.x, this.location.y, plKill.id));
+        } else if (Util.isTrue(5, 100)) {
+            Service.gI().dropItemMap(this.zone, Util.ratioDHD(zone, itemDos[randomc14], 1, this.location.x, this.location.y, plKill.id));
+            return;
+        } else {
+            Service.gI().dropItemMap(this.zone, new ItemMap(zone, Manager.itemIds_NR_SB[randomNR], 1, this.location.x, this.location.y, plKill.id));
+        }
+    }
+
+    @Override
+    public void active() {
+        super.active(); //To change body of generated methods, choose Tools | Templates.
+        ///    if (Util.canDoWithTime(st, 900000)) {
+        //       this.changeStatus(BossStatus.LEAVE_MAP);
+        //    }
+    }
+
+    @Override
+    public void joinMap() {
+        super.joinMap(); //To change body of generated methods, choose Tools | Templates.
+        st = System.currentTimeMillis();
+    }
+
+    private long st;
+
+    @Override
+    public double injured(Player plAtt, double damage, boolean piercing, boolean isMobAttack) {
+        if (!this.isDie()) {
+            if (!piercing && Util.isTrue(this.nPoint.tlNeDon, 1000)) {
+                this.chat("Xí hụt");
+                return 0;
+            }
+            damage = this.nPoint.subDameInjureWithDeff(damage / 5);
+            if (!piercing && effectSkill.isShielding) {
+                if (damage > nPoint.hpMax) {
+                    EffectSkillService.gI().breakShield(this);
+                }
+                damage = 1;
+            }
+            this.nPoint.subHP(damage);
+            if (isDie()) {
+                this.setDie(plAtt);
+                die(plAtt);
+            }
+            return damage;
+        } else {
+            return 0;
+        }
+    }
+//    @Override
+//    public void moveTo(int x, int y) {
+//        if(this.currentLevel == 1){
+//            return;
+//        }
+//        super.moveTo(x, y);
+//    }
+//
+//    @Override
+//    public void reward(Player plKill) {
+//        if(this.currentLevel == 1){
+//            return;
+//        }
+//        super.reward(plKill);
+//    }
+//
+//    @Override
+//    protected void notifyJoinMap() {
+//        if(this.currentLevel == 1){
+//            return;
+//        }
+//        super.notifyJoinMap();
+//    }
+}
